@@ -12,8 +12,7 @@
         WindowStartupLocation="CenterScreen"
         FontFamily="Calibri">
 
-    <Border Background="#F2F2F2"
-            CornerRadius="10">
+    <Border Background="#F2F2F2">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="167"/>
@@ -93,7 +92,7 @@
                      Stroke="Black" 
                      VerticalAlignment="Top" 
                      Width="12" 
-                     Fill="{Binding Diody[1]}" RenderTransformOrigin="0.5,1.878"/>
+                     Fill="{Binding Diody[1]}"/>
 
             <Ellipse Grid.Column="1"
                      HorizontalAlignment="Right" 
@@ -123,9 +122,9 @@
                          Header="Szybkie sterowanie"
                          FontSize="18"
                          Height="50"
-                         IsEnabled="True"
+                         IsEnabled="{Binding IsConnected}"
                          Cursor="Hand">
-                    <Grid>
+                    <Grid IsEnabled="{Binding IsConnected}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.5*"/>
                             <ColumnDefinition Width="1*"/>
@@ -275,7 +274,9 @@
                                 Height="50"
                                 VerticalAlignment="Top" 
                                 Margin="0,70,0,0"
-                                Cursor="Hand"/>
+                                Cursor="Hand"
+                                Command="{Binding EngineCommand}" 
+                                CommandParameter="10"/>
 
                         <Button Style="{DynamicResource ButtonStyle}"
                                 Grid.Column="1" 
@@ -284,9 +285,12 @@
                                 Height="50"
                                 VerticalAlignment="Top" 
                                 Margin="0,140,0,0"
-                                Cursor="Hand"/>
+                                Cursor="Hand"
+                                Command="{Binding EngineCommand}" 
+                                CommandParameter="6"/>
 
-                        <Button Style="{DynamicResource StopButtonStyle}" Grid.Column="1" 
+                        <Button Style="{DynamicResource StopButtonStyle}" 
+                                Grid.Column="1" 
                                 Content="STOP" 
                                 Background="#A10B00" 
                                 Width="170"
@@ -294,7 +298,9 @@
                                 VerticalAlignment="Top" 
                                 Margin="0,210,0,0"
                                 Cursor="Hand"
-                                Foreground="White"/>
+                                Foreground="White"
+                                Command="{Binding EngineCommand}" 
+                                CommandParameter="1"/>
 
                         <!--ostatni alarm-->
                         <TextBlock Grid.Column="2" 
@@ -340,38 +346,44 @@
                                    HorizontalAlignment="Left" 
                                    Margin="10,250,0,0"/>
 
-                        <TextBox Grid.Column="2" 
+                        <TextBox Text="{Binding AlarmErrorLabel}"
+                                 Grid.Column="2" 
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,50,30,0" 
                                  Width="290" 
                                  IsEnabled="False"/>
 
-                        <TextBox Grid.Column="2"
+                        <TextBox Text="{Binding AlarmParameters[0]}"
+                                 Grid.Column="2"
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,90,85,0" 
                                  Width="50"/>
 
-                        <TextBox Grid.Column="2" 
+                        <TextBox Text="{Binding AlarmParameters[1]}"
+                                 Grid.Column="2" 
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,130,85,0" 
                                  Width="50"/>
 
-                        <TextBox Grid.Column="2" 
+                        <TextBox Text="{Binding AlarmParameters[2]}"
+                                 Grid.Column="2" 
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,170,85,0" 
                                  Width="50"/>
 
-                        <TextBox Grid.Column="2" 
+                        <TextBox Text="{Binding AlarmParameters[3]}"
+                                 Grid.Column="2" 
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,210,85,0" 
                                  Width="50"/>
 
-                        <TextBox Grid.Column="2" 
+                        <TextBox Text="{Binding AlarmParameters[4]}"
+                                 Grid.Column="2" 
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,250,85,0" 
@@ -384,9 +396,9 @@
                          Header="Edycja parametrów"
                          FontSize="18"
                          Height="50"
-                         IsEnabled="True"
+                         IsEnabled="{Binding IsConnected}"
                          Cursor="Hand">
-                    <Grid>
+                    <Grid IsEnabled="{Binding IsConnected}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
                             <RowDefinition Height="1*"/>
@@ -490,7 +502,7 @@
                                  Cursor="IBeam"/>
 
                         <TextBox Text="{Binding BiezacaWartosc}"
-                                 
+                                 PreviewTextInput="NumberValidationTextBox"
                                  IsEnabled="{Binding BiezacaWartoscEnabled}"  
                                  Grid.Row="4" 
                                  Grid.Column="1" 
@@ -520,9 +532,9 @@
                          Header="Import/eksport"
                          FontSize="18"
                          Height="50"
-                         IsEnabled="True"
+                         IsEnabled="{Binding IsConnected}"
                          Cursor="Hand">
-                    <Grid>
+                    <Grid IsEnabled="{Binding IsConnected}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
                             <RowDefinition Height="5*"/>
