@@ -465,12 +465,13 @@
                                 Margin="0,0,300,0"/>
 
                         <ComboBox ItemsSource="{Binding ListaTestowa}" 
-                                  SelectedValue="{Binding WybranaKategoria, Mode=TwoWay}" 
+                                  SelectedValue="{Binding WybranaKategoria}" 
                                   SelectedValuePath="Key" 
                                   DisplayMemberPath="Value" 
                                   Grid.Row="0" 
                                   Grid.Column="1" 
-                                  Width="150" 
+                                  Width="412" 
+                                  Height="30"                                 
                                   VerticalAlignment="Center" 
                                   HorizontalAlignment="Left" 
                                   Margin="25,0,0,0"/>
@@ -515,6 +516,7 @@
                         <Button Style="{DynamicResource RoundedBtn}"
                                 Command="{Binding SaveRegisterCommand}" 
                                 CommandParameter="{Binding WybranyParametr}"
+                                IsEnabled="{Binding BiezacaWartoscEnabled}"
                                 Grid.Row="5" 
                                 Grid.Column="1" 
                                 Content="Zapisz" 
@@ -558,6 +560,7 @@
                                    FontSize="20"/>
 
                         <Button Style="{DynamicResource RoundedBtn}"
+                                Command="{Binding ImportCommand}"
                                 Grid.Row="1"
                                 Content="Załaduj"
                                 VerticalAlignment="Center"
@@ -566,6 +569,7 @@
                                 Height="50"/>
 
                         <Button Style="{DynamicResource RoundedBtn}"
+                                Command="{Binding ExportCommand}"
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Content="Zapisz"

@@ -1,8 +1,11 @@
 ﻿using EasyModbus;
+using Microsoft.VisualBasic.FileIO;
+using Microsoft.Win32;
 using SANYU2021.Commands;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -17,34 +20,8 @@ namespace SANYU2021.ViewModel
 
     public class MainViewModel : INotifyPropertyChanged
     {
-        static Dictionary<int, string> bledyAlarmow = new Dictionary<int, string>()
-        {
-            {0,"Brak błędu"},
-            {2,"Przeciążenie prądowe podczas przysp."},
-            {3,"Przeciążenie prądowe podczas ham."},
-            {4,"Przeciązenie prądowe dla stałej prędkości"},
-            {5,"Przepięcie podczas przysp."},
-            {6,"Przepięcie podczas ham."},
-            {7,"Przepięcie dla stałej prędkości"},
-            {8,"Przeciążony rezystor"},
-            {9,"Zbyt małe napięcie zasilania"},
-            {10,"Przeciążenie napędu"},
-            {11,"Przeciązenie silnika"},
-            {14,"Moduł przegrzany"},
-            {15,"Błąd zewnętrzny"},
-            {16,"Błąd komunikacji"},
-            {24,"Za niskie ciśnienie (dla PID)"},
-            {27,"Za wysokie ciśnienie (dla PID)"},
-            {28,"Suchobieg"},
-            {29,"Czas zasilania osiągnięty"},
-            {31,"Błąd sterowania PID"}
-        };
-        static Dictionary<int, string> typyRejestrow = new Dictionary<int, string>()
-        {
-            {0,"Tylko do odczytu"},
-            {1,"Edycja w stanie zatrzymania lub pracy"},
-            {2,"Edycja w stanie zatrzymania"}
-        };
+
+
 
         private ModbusClient ModClient = new ModbusClient("COM3");
 
@@ -55,14 +32,14 @@ namespace SANYU2021.ViewModel
         private bool _odczytStance = false;
         private int _engineStance = -1;
 
-       
+
         public MainViewModel()
         {
             //parametry
             connectionTimer.Interval = new TimeSpan(0, 0, 1);
             connectionTimer.Tick += ConnectionTimer_Tick;
 
-            odczytTimer.Interval = new TimeSpan(0, 0, 0,0,250);
+            odczytTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
             odczytTimer.Tick += OdczytTimer_Tick;
 
             //tymczasowe parametry polacznia slave
@@ -74,10 +51,12 @@ namespace SANYU2021.ViewModel
             OdczytCommand = new RelayCommand(OdczytFunc);
             EngineCommand = new RelayCommand(EngineFunc);
             SaveRegisterCommand = new RelayCommand(SaveRegisterFunc);
+            ExportCommand = new RelayCommand(saveFile);
+            ImportCommand = new RelayCommand(openFile);
 
             //zmienne
             ConnVal = "Brak połączenia";
-            IsConnected = false;         
+            IsConnected = false;
         }
 
         private void SaveRegisterFunc(object obj)
@@ -116,7 +95,7 @@ namespace SANYU2021.ViewModel
                                 BiezacaWartosc = 0;
                             }
                         }
-                            break;
+                        break;
                     case 2:
                         if (BiezacaWartosc > aktualnyRejestr.Max || BiezacaWartosc < aktualnyRejestr.Min || _engineStance != 0)
                         {
@@ -155,7 +134,7 @@ namespace SANYU2021.ViewModel
                 var param = Convert.ToInt32(obj);
                 ModClient.WriteSingleRegister(8192, param);
             }
-            catch(Exception ex)
+            catch
             {
                 MessageBox.Show("Bład podczas wywolywania funkcji rozruchu lub stopu");
             }
@@ -165,9 +144,19 @@ namespace SANYU2021.ViewModel
         {
             try
             {
-                Odczyt = ModClient.ReadHoldingRegisters(1, 9);
+                //int[] temptable = ModClient.ReadHoldingRegisters(1, 9);
+                int[] temptable = new int[] { 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999 };
+                double[] temptabled = new double[9];
+
+                for(int i=0; i<temptable.Length;i++)
+                {
+                    temptabled[i] = (double)temptable[i];
+                    if(i != 7) temptabled[i] = temptabled[i] / 10;
+                }
+                Odczyt = temptabled;
+
             }
-            catch(Exception ex)
+            catch
             {
                 zatrzymajCzytanie();
             }
@@ -178,7 +167,7 @@ namespace SANYU2021.ViewModel
             odczytTimer.Stop();
             _odczytStance = false;
             OdczytStanceLabel = "Rozpocznij zczytywanie";
-             
+
         }
 
         private void OdczytFunc(object obj)
@@ -202,12 +191,12 @@ namespace SANYU2021.ViewModel
                 _engineStance = ModClient.ReadHoldingRegisters(28, 1)[0];
                 ustawDiody(_engineStance);
             }
-            catch(Exception ex)
+            catch
             {
                 wyloguj();
                 MessageBox.Show("Urządzenie zostało odłączone lub nastąpił problem połączenia", "Błąd połączenia", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        } 
+        }
 
         //glowny przycisk connect
         private void ConnectFunc(object obj)
@@ -215,9 +204,9 @@ namespace SANYU2021.ViewModel
             if (!IsConnected)
             {
                 //WYMUSZONY START!!!!!
-                zaloguj();
-                //ConnVal = "Wymuszony start!!!";
-                //IsConnected = true;
+                //zaloguj();
+                ConnVal = "Wymuszony start!!!";
+                IsConnected = true;
 
             }
             else
@@ -270,7 +259,7 @@ namespace SANYU2021.ViewModel
 
 
             }
-            catch (Exception ex)
+            catch
             {
                 ConnVal = "Błąd połączenia";
                 MessageBox.Show("Nie udało się połączyć", "Błąd połączenia", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -279,8 +268,9 @@ namespace SANYU2021.ViewModel
 
         void pobierzAlarm()
         {
+
             int[] val = ModClient.ReadHoldingRegisters(10, 1);
-            AlarmErrorLabel = bledyAlarmow[val[0]];
+            AlarmErrorLabel = StaticArrays.bledyAlarmow[val[0]];
             AlarmParameters = ModClient.ReadHoldingRegisters(14, 5);
         }
 
@@ -297,10 +287,14 @@ namespace SANYU2021.ViewModel
 
 
         //komendy
-        public ICommand ConnectCommand{ get; set; }
+        public ICommand ConnectCommand { get; set; }
         public ICommand OdczytCommand { get; set; }
         public ICommand EngineCommand { get; set; }
         public ICommand SaveRegisterCommand { get; set; }
+        public ICommand ExportCommand { get; set; }
+        public ICommand ImportCommand { get; set; }
+
+
 
 
         //zmienne dynamiczne
@@ -308,15 +302,15 @@ namespace SANYU2021.ViewModel
         public string ConnVal
         {
             get { return _connVal; }
-            set { 
+            set {
                 _connVal = value;
                 OnPropetryChanged();
             }
         }
 
         //tablica z wartosciami odczytu natychmiastowego
-        private int[] _odczyt;
-        public int[] Odczyt
+        private double[] _odczyt = new double[9];
+        public double[] Odczyt
         {
             get { return _odczyt; }
             set { _odczyt = value;
@@ -377,9 +371,9 @@ namespace SANYU2021.ViewModel
         }
 
         //tablica kolorow diód
-        private SolidColorBrush[] _diody = new SolidColorBrush[] 
+        private SolidColorBrush[] _diody = new SolidColorBrush[]
         {
-            new SolidColorBrush(Colors.Gray), new SolidColorBrush(Colors.Gray) , new SolidColorBrush(Colors.Gray) 
+            new SolidColorBrush(Colors.Gray), new SolidColorBrush(Colors.Gray) , new SolidColorBrush(Colors.Gray)
         };
         public SolidColorBrush[] Diody
         {
@@ -389,24 +383,14 @@ namespace SANYU2021.ViewModel
             }
         }
 
-        //lista rozwijana -> do przerobienia na DICT
-        private KeyValuePair<int, string>[] tripLengthList = {
-        new KeyValuePair<int, string>(0, "P0XX"),
-        new KeyValuePair<int, string>(1, "P1XX"),
-        new KeyValuePair<int, string>(2, "P2XX"),
-        new KeyValuePair<int, string>(3, "P3XX"),
-        new KeyValuePair<int, string>(4, "P4XX"),
-        new KeyValuePair<int, string>(5, "P5XX"),
-        new KeyValuePair<int, string>(6, "P6XX"),
-        new KeyValuePair<int, string>(7, "P7XX"),
-        new KeyValuePair<int, string>(8, "P8XX"),
-        };
-        public KeyValuePair<int, string>[] ListaTestowa
+        //lista rozwijana
+        private Dictionary<int, string> _listaKategorii = StaticArrays.listaKategorii;
+        public Dictionary<int,string> ListaTestowa
         {
-            get { return tripLengthList; }
+            get { return _listaKategorii; }
             set
             {
-                tripLengthList = value;
+                _listaKategorii = value;
                 OnPropetryChanged();
             }
         }
@@ -442,7 +426,7 @@ namespace SANYU2021.ViewModel
         }
 
         //zmienna przechowująca typ dla danego rejestru -> dB
-        private string _typ;
+        private string _typ = "-";
         public string Typ
         {
             get { return _typ; }
@@ -514,7 +498,7 @@ namespace SANYU2021.ViewModel
                 aktualnyRejestr = DbLocator.Database.TabelaRejestrow.FirstOrDefault(x => x.NazwaRejestru == rejestr);
                 WartoscDomyslna = aktualnyRejestr.WartoscDomyslna;
                 ZakresWartosci = aktualnyRejestr.ZakresWartosci;
-                Typ = typyRejestrow[aktualnyRejestr.Typ];
+                Typ = StaticArrays.typyRejestrow[aktualnyRejestr.Typ];
                 if (aktualnyRejestr.Typ > 0) BiezacaWartoscEnabled = true;
                 try
                 {
@@ -527,6 +511,80 @@ namespace SANYU2021.ViewModel
             }
             else aktualnyRejestr = null;
         }
+
+
+        //IMPORT EKSPORT:
+       private void saveFile(object obj)
+        {
+            string savedFile = null;
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Pliki *.sanyu | *.sanyu";
+            if (sfd.ShowDialog() == true)
+            {
+                savedFile = Path.GetFullPath(sfd.FileName.ToString());
+                StringBuilder csv = new StringBuilder();
+                csv.Append("rejestr;wartosc\n");
+                for (int i = 0; i < 1000; i++)
+                {
+                    try
+                    {
+                        //var valueToExport = ModClient.ReadHoldingRegisters(listaeksportu[i]?, 1)[0];
+                        var newLine = string.Format("{0};{1}\n", i.ToString(), i * i);
+                        csv.Append(newLine);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Nie udało się zapisać pliku");
+                        return;
+                    }
+                }
+                File.AppendAllText(savedFile, csv.ToString());
+                MessageBox.Show("Pomyślnie zapisano plik!");
+            }
+        }
+        private void openFile(object obj)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Sanyu Files | *.sanyu";
+            dialog.Multiselect = false;
+
+            if (dialog.ShowDialog() == true)
+            {
+                importFile(dialog.FileName);
+            }
+        }
+        private void importFile(string fileName)
+        {
+            using (TextFieldParser parser = new TextFieldParser(fileName))
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(";");
+                int rejestr;
+                int wartosc;
+                if (!parser.EndOfData)
+                {
+                    parser.ReadLine();
+                }
+                while (!parser.EndOfData)
+                {
+                    try
+                    {
+                        //Process row
+                        string[] fields = parser.ReadFields();
+                        rejestr = Int32.Parse(fields[0]);
+                        wartosc = Int32.Parse(fields[1]);
+                        ModClient.WriteSingleRegister(rejestr, wartosc);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
+                        break;
+                    }
+                }
+            }
+        }
+
+
 
 
 
