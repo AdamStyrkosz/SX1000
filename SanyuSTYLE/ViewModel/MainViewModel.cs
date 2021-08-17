@@ -144,14 +144,15 @@ namespace SANYU2021.ViewModel
         {
             try
             {
-                //int[] temptable = ModClient.ReadHoldingRegisters(1, 9);
-                int[] temptable = new int[] { 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999 };
+                int[] temptable = ModClient.ReadHoldingRegisters(1, 9);
+                //int[] temptable = new int[] { 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999 };
                 double[] temptabled = new double[9];
 
                 for(int i=0; i<temptable.Length;i++)
                 {
                     temptabled[i] = (double)temptable[i];
-                    if(i != 7) temptabled[i] = temptabled[i] / 10;
+                    if (i == 0 || i == 1 || i == 2 || i == 4) temptabled[i] = temptabled[i] / 10;
+                    else if (i == 6) temptabled[i] = temptabled[i] / 100;
                 }
                 Odczyt = temptabled;
 
