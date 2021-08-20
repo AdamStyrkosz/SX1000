@@ -204,9 +204,9 @@ namespace SANYU2021.ViewModel
             if (!IsConnected)
             {
                 //WYMUSZONY START!!!!!
-                //zaloguj();
-                ConnVal = "Wymuszony start!!!";
-                IsConnected = true;
+                zaloguj();
+                //ConnVal = "Wymuszony start!!!";
+                //IsConnected = true;
 
             }
             else
@@ -573,15 +573,15 @@ namespace SANYU2021.ViewModel
                         string[] fields = parser.ReadFields();
                         rejestr = Int32.Parse(fields[0]);
                         wartosc = Int32.Parse(fields[2]);
-                        //ModClient.WriteSingleRegister(rejestr, wartosc);
-                        MessageBox.Show(rejestr + "::" +wartosc);
+                        ModClient.WriteSingleRegister(rejestr, wartosc);
                     }
                     catch
                     {
                         MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
-                        break;
+                        return;
                     }
                 }
+                MessageBox.Show("Poprawnie zaimportowano plik");
             }
         }
 
