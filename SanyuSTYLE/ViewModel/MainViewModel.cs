@@ -27,7 +27,6 @@ namespace SANYU2021.ViewModel
 
         private DispatcherTimer connectionTimer = new DispatcherTimer();
         private DispatcherTimer odczytTimer = new DispatcherTimer();
-
         private Rejestr aktualnyRejestr;
         private bool _odczytStance = false;
         private int _engineStance = -1;
@@ -524,13 +523,13 @@ namespace SANYU2021.ViewModel
             {
                 savedFile = Path.GetFullPath(sfd.FileName.ToString());
                 StringBuilder csv = new StringBuilder();
-                csv.Append("rejestr;wartosc\n");
-                for (int i = 0; i < 1000; i++)
+                csv.Append("rejestr;wartosc_domyslna;wartosc_biezaca\n");
+                foreach (var rej in DbLocator.Database.TabelaRejestrow.ToList())                  
                 {
                     try
                     {
-                        //var valueToExport = ModClient.ReadHoldingRegisters(listaeksportu[i]?, 1)[0];
-                        var newLine = string.Format("{0};{1}\n", i.ToString(), i * i);
+                        var valueToExport = ModClient.ReadHoldingRegisters(rej.Id, 1)[0];
+                        var newLine = string.Format("{0};{1};{2}\n", rej.Id,rej.WartoscDomyslna.ToString() ,valueToExport);
                         csv.Append(newLine);
                     }
                     catch
@@ -573,8 +572,9 @@ namespace SANYU2021.ViewModel
                         //Process row
                         string[] fields = parser.ReadFields();
                         rejestr = Int32.Parse(fields[0]);
-                        wartosc = Int32.Parse(fields[1]);
-                        ModClient.WriteSingleRegister(rejestr, wartosc);
+                        wartosc = Int32.Parse(fields[2]);
+                        //ModClient.WriteSingleRegister(rejestr, wartosc);
+                        MessageBox.Show(rejestr + "::" +wartosc);
                     }
                     catch
                     {

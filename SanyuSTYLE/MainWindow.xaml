@@ -473,7 +473,6 @@
                                    Grid.Column="0" 
                                    Grid.ColumnSpan="2" 
                                    Text="{Binding ZakresWartosci}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,300,0" FontSize="20"/>
-
                         <Border Grid.Row="5" 
                                 Grid.Column="0" 
                                 Grid.ColumnSpan="2" 
