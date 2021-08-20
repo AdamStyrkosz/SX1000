@@ -18,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Images\falownik-skalarny-SX1000.png" />
     <None Remove="Images\logo.png" />
+    <None Remove="Images\schemat.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\falownik-skalarny-SX1000.png" />
     <Resource Include="Images\logo.png" />
+    <Resource Include="Images\schemat.png" />
   </ItemGroup>
 
 </Project>

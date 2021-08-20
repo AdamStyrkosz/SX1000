@@ -36,17 +36,9 @@
                        Grid.Column="1"
                        HorizontalAlignment="Left" 
                        VerticalAlignment="Top" 
-                       Margin="150,10,0,0" 
+                       Margin="150,20,0,0" 
                        FontSize="40"
                        FontWeight="Bold"/>
-
-            <TextBlock Text="MODEL: SX1000-0R4G-2"
-                       Grid.Column="1"
-                       HorizontalAlignment="Left" 
-                       VerticalAlignment="Top" 
-                       Margin="165,54,0,0" 
-                       FontSize="10"
-                       FontWeight="DemiBold"/>
 
             <TextBlock Grid.Column="1"
                        Text="Status:"
@@ -114,7 +106,32 @@
                          Height="50"
                          IsEnabled="True"
                          Cursor="Hand">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="1"
+                                   Text="Schemat konfiguracji"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="20"
+                                   FontWeight="Bold"/>
+                        
+                        <Image Grid.Row="1"
+                               Grid.Column="1"
+                               Source="Images/schemat.png"
+                               Stretch="Uniform"/>
 
+                        <Image Grid.Column="0"
+                               Grid.RowSpan="2"
+                               Source="Images/falownik-skalarny-SX1000.png"
+                               Stretch="Uniform"/>
+                    </Grid>
                 </TabItem>
 
                 <!--SZYBKIE STEROWANIE-->
@@ -597,7 +614,7 @@
             <TextBlock Grid.Row="1" 
                        Text="{Binding ConnVal}"
                        HorizontalAlignment="Left" 
-                       Margin="50,0,0,50" 
+                       Margin="35,0,0,50" 
                        VerticalAlignment="Bottom"/>
         </Grid>
     </Border>
