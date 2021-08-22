@@ -514,11 +514,13 @@ namespace SANYU2021.ViewModel
 
 
         //IMPORT EKSPORT:
+
+        //EKSPORT PODGLĄDOWY
        private void saveFile(object obj)
         {
             string savedFile = null;
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Pliki *.sanyu | *.sanyu";
+            sfd.Filter = "Pliki *.csv | *.csv";
             if (sfd.ShowDialog() == true)
             {
                 savedFile = Path.GetFullPath(sfd.FileName.ToString());
@@ -542,6 +544,8 @@ namespace SANYU2021.ViewModel
                 MessageBox.Show("Pomyślnie zapisano plik!");
             }
         }
+
+        //IMPORT
         private void openFile(object obj)
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -584,7 +588,6 @@ namespace SANYU2021.ViewModel
                 MessageBox.Show("Poprawnie zaimportowano plik");
             }
         }
-
 
 
 
