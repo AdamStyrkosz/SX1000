@@ -52,11 +52,14 @@ namespace SANYU2021.ViewModel
             SaveRegisterCommand = new RelayCommand(SaveRegisterFunc);
             ExportCommand = new RelayCommand(saveFile);
             ImportCommand = new RelayCommand(openFile);
+            FullExportCommand = new RelayCommand(fullexport);
 
             //zmienne
             ConnVal = "Brak połączenia";
             IsConnected = false;
         }
+
+        
 
         private void SaveRegisterFunc(object obj)
         {
@@ -204,9 +207,9 @@ namespace SANYU2021.ViewModel
             if (!IsConnected)
             {
                 //WYMUSZONY START!!!!!
-                zaloguj();
-                //ConnVal = "Wymuszony start!!!";
-                //IsConnected = true;
+                //zaloguj();
+                ConnVal = "Wymuszony start!!!";
+                IsConnected = true;
 
             }
             else
@@ -268,7 +271,6 @@ namespace SANYU2021.ViewModel
 
         void pobierzAlarm()
         {
-
             int[] val = ModClient.ReadHoldingRegisters(10, 1);
             AlarmErrorLabel = StaticArrays.bledyAlarmow[val[0]];
             AlarmParameters = ModClient.ReadHoldingRegisters(14, 5);
@@ -278,6 +280,7 @@ namespace SANYU2021.ViewModel
         {
             ModClient.Disconnect();
             ConnVal = "Rozłączono";
+            _engineStance = -1;
             IsConnected = false;
             connectionTimer.Stop();
             ustawDiody(-1);
@@ -292,12 +295,24 @@ namespace SANYU2021.ViewModel
         public ICommand EngineCommand { get; set; }
         public ICommand SaveRegisterCommand { get; set; }
         public ICommand ExportCommand { get; set; }
+        public ICommand FullExportCommand { get; set; }
         public ICommand ImportCommand { get; set; }
 
 
 
 
         //zmienne dynamiczne
+
+        private bool _isReady = true;
+        public bool IsReady
+        {
+            get { return _isReady; }
+            set { _isReady = value;
+                OnPropetryChanged();
+            }
+        }
+
+
         private string _connVal;
         public string ConnVal
         {
@@ -520,18 +535,51 @@ namespace SANYU2021.ViewModel
         {
             string savedFile = null;
             SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Pliki Sanyu | *.sanyu";
+            if (sfd.ShowDialog() == true)
+            {
+                IsReady = false;
+                savedFile = Path.GetFullPath(sfd.FileName.ToString());
+                StringBuilder csv = new StringBuilder();
+                csv.Append("rejestr;wartosc\n");
+                foreach (var rej in DbLocator.Database.TabelaRejestrow.Where(x => x.Typ != 0).ToList())
+                {
+                    try
+                    {
+                        var valueToExport = ModClient.ReadHoldingRegisters(rej.Id, 1)[0];         
+                        var newLine = string.Format("{0};{1}\n", rej.Id, valueToExport);
+                        csv.Append(newLine);
+                    }
+                    catch
+                    {
+                        IsReady = true;
+                        MessageBox.Show("Nie udało się zapisać pliku");
+                        return;
+                    }
+                }
+                File.AppendAllText(savedFile, csv.ToString());
+                IsReady = true;
+                MessageBox.Show("Pomyślnie zapisano plik!");
+            }
+        }
+
+        private void fullexport(object obj)
+        {
+            string savedFile = null;
+            SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Pliki *.csv | *.csv";
             if (sfd.ShowDialog() == true)
             {
+                IsReady = false;
                 savedFile = Path.GetFullPath(sfd.FileName.ToString());
                 StringBuilder csv = new StringBuilder();
                 csv.Append("rejestr;wartosc_domyslna;wartosc_biezaca\n");
-                foreach (var rej in DbLocator.Database.TabelaRejestrow.ToList())                  
+                foreach (var rej in DbLocator.Database.TabelaRejestrow.ToList())
                 {
                     try
                     {
                         var valueToExport = ModClient.ReadHoldingRegisters(rej.Id, 1)[0];
-                        var newLine = string.Format("{0};{1};{2}\n", rej.Id,rej.WartoscDomyslna.ToString() ,valueToExport);
+                        var newLine = string.Format("{0};{1};{2}\n", rej.Id, rej.WartoscDomyslna.ToString(), valueToExport);
                         csv.Append(newLine);
                     }
                     catch
@@ -541,6 +589,7 @@ namespace SANYU2021.ViewModel
                     }
                 }
                 File.AppendAllText(savedFile, csv.ToString());
+                IsReady = true;
                 MessageBox.Show("Pomyślnie zapisano plik!");
             }
         }
@@ -548,6 +597,11 @@ namespace SANYU2021.ViewModel
         //IMPORT
         private void openFile(object obj)
         {
+            if (_engineStance != 0)
+            {
+                MessageBox.Show("Wymagany tryb STOP");
+                return;
+            }
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Sanyu Files | *.sanyu";
             dialog.Multiselect = false;
@@ -559,8 +613,10 @@ namespace SANYU2021.ViewModel
         }
         private void importFile(string fileName)
         {
+          
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
+                IsReady = false;
                 parser.TextFieldType = FieldType.Delimited;
                 parser.SetDelimiters(";");
                 int rejestr;
@@ -581,10 +637,12 @@ namespace SANYU2021.ViewModel
                     }
                     catch
                     {
+                        IsReady = true;
                         MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
                         return;
                     }
                 }
+                IsReady = true;
                 MessageBox.Show("Poprawnie zaimportowano plik");
             }
         }

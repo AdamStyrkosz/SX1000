@@ -10,7 +10,8 @@
         Width="1280"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        FontFamily="Calibri">
+        FontFamily="Calibri"
+        IsEnabled="{Binding IsReady}">
 
     <Border Background="#F2F2F2">
         <Grid>
@@ -593,6 +594,7 @@
                                    FontSize="20"/>
 
                         <Button Style="{DynamicResource RoundedBtn}"
+                                Command="{Binding ExportCommand}"
                                 Grid.Row="1"
                                 Content="EKSPORT"
                                 VerticalAlignment="Center"
@@ -614,7 +616,7 @@
                         
 
                         <Button Style="{DynamicResource RoundedBtn}"
-                                Command="{Binding ExportCommand}"
+                                Command="{Binding FullExportCommand}"
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Content="Pobierz parametry"
