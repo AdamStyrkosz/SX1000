@@ -11,7 +11,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         FontFamily="Calibri"
-        IsEnabled="{Binding IsReady}">
+        >
 
     <Border Background="#F2F2F2">
         <Grid>
@@ -627,17 +627,17 @@
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit.&#x0a;Proin eget mattis eros. Morbi velit lorem, aliquam sodales lorem&#x0a;bibendum,aliquam convallis elit. Ut rutrum eget eros ac&#x0a;ullamcorper.Donec in facilisis ipsum. In dapibus, ex eu faucibus"
+                                   Text="Sekcja import/eksport pozwala na eksport parametrów&#x0a;z falownika i ich import do innych falowników tego samego&#x0a;modelu.&#x0a;Pliki zapisywane sa w formacie *.sanyu i tylko taki typ pliku&#x0a;można importować.&#x0a;Proces importu oraz eksportu trwa kilkasekund i na ten&#x0a;czas aplikacja zostaje zawieszona."
                                    HorizontalAlignment="Left"
-                                   Margin="5,0,5,0"
-                                   FontSize="20"/>
+                                   Margin="10,20,5,0"
+                                   FontSize="22"/>
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
-                                   Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit.&#x0a;Proin eget mattis eros. Morbi velit lorem, aliquam sodales lorem&#x0a;bibendum,aliquam convallis elit. Ut rutrum eget eros ac ullamcorper. &#x0a;Donec in facilisis ipsum. In dapibus, ex eu faucibus"
+                                   Text="Sekcja eksport podglądowy pozwala pobrać wszystkie&#x0a;parametry z falownika do późniejszego podglądu.&#x0a;Pliki zapisywane sa w formacie *.csv, dzięki czemu możliwy&#x0a;jest ich łatwy odczyt w pragoramach takich jak excel czy&#x0a;notatnik.&#x0a;Proces eksportu podglądowego trwa kilka sekund i na ten&#x0a;czas aplikacja zostaje zawieszona."
                                    HorizontalAlignment="Left"
-                                   Margin="5,0,5,0"
-                                   FontSize="20"/>
+                                   Margin="10,20,5,0"
+                                   FontSize="22"/>
 
                     </Grid>
                 </TabItem>
