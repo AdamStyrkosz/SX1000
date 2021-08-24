@@ -20,24 +20,18 @@ namespace SANYU2021.ViewModel
 
     public class MainViewModel : INotifyPropertyChanged
     {
-
-
-
         private ModbusClient ModClient = new ModbusClient("COM3");
-
         private DispatcherTimer connectionTimer = new DispatcherTimer();
         private DispatcherTimer odczytTimer = new DispatcherTimer();
         private Rejestr aktualnyRejestr;
         private bool _odczytStance = false;
         private int _engineStance = -1;
 
-
         public MainViewModel()
         {
             //parametry
             connectionTimer.Interval = new TimeSpan(0, 0, 1);
             connectionTimer.Tick += ConnectionTimer_Tick;
-
             odczytTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
             odczytTimer.Tick += OdczytTimer_Tick;
 
@@ -58,8 +52,6 @@ namespace SANYU2021.ViewModel
             ConnVal = "Brak połączenia";
             IsConnected = false;
         }
-
-        
 
         private void SaveRegisterFunc(object obj)
         {
@@ -101,7 +93,7 @@ namespace SANYU2021.ViewModel
                     case 2:
                         if (BiezacaWartosc > aktualnyRejestr.Max || BiezacaWartosc < aktualnyRejestr.Min || _engineStance != 0)
                         {
-                            MessageBox.Show("Wprowadzono niepoprawną wartość lub silnik działa");
+                            MessageBox.Show("Wprowadzono niepoprawną wartość lub silnik nie jest w stanie STOP");
                             try
                             {
                                 BiezacaWartosc = ModClient.ReadHoldingRegisters(aktualnyRejestr.Id, 1)[0];
@@ -146,8 +138,7 @@ namespace SANYU2021.ViewModel
         {
             try
             {
-                int[] temptable = ModClient.ReadHoldingRegisters(1, 9);
-                //int[] temptable = new int[] { 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999 };
+                int[] temptable = ModClient.ReadHoldingRegisters(1, 9);                
                 double[] temptabled = new double[9];
 
                 for(int i=0; i<temptable.Length;i++)
@@ -206,9 +197,9 @@ namespace SANYU2021.ViewModel
         {
             if (!IsConnected)
             {
-                //WYMUSZONY START!!!!!
                 zaloguj();
                 //ConnVal = "Wymuszony start!!!";
+                //ConnectButtonStance = "Rozłącz";
                 //IsConnected = true;
 
             }
@@ -257,6 +248,7 @@ namespace SANYU2021.ViewModel
                 ModClient.ReadHoldingRegisters(28, 1);
                 pobierzAlarm();
                 ConnVal = "Połączono";
+                ConnectButtonStance = "Rozłącz";
                 IsConnected = true;
                 connectionTimer.Start();
 
@@ -264,8 +256,10 @@ namespace SANYU2021.ViewModel
             }
             catch
             {
-                ConnVal = "Błąd połączenia";
-                MessageBox.Show("Nie udało się połączyć", "Błąd połączenia", MessageBoxButton.OK, MessageBoxImage.Error);
+                ConnVal = "Brak połączenia";
+                ConnectButtonStance = "Połącz";
+                MessageBox.Show("Nie udało się połączyć, sprawdź ustawienia falownika:\n-Prędkość transmisji -> 9600 bps\n-Format danych -> Tryb RTU, brak bitu parzystości", "Błąd połączenia", MessageBoxButton.OK, MessageBoxImage.Error);
+
             }
         }
 
@@ -279,7 +273,8 @@ namespace SANYU2021.ViewModel
         void wyloguj()
         {
             ModClient.Disconnect();
-            ConnVal = "Rozłączono";
+            ConnVal = "Brak połączenia";
+            ConnectButtonStance = "Połącz";
             _engineStance = -1;
             IsConnected = false;
             connectionTimer.Stop();
@@ -308,6 +303,15 @@ namespace SANYU2021.ViewModel
         {
             get { return _isReady; }
             set { _isReady = value;
+                OnPropetryChanged();
+            }
+        }
+
+        private string _connectButtonStance = "Połącz";
+        public string ConnectButtonStance
+        {
+            get { return _connectButtonStance; }
+            set { _connectButtonStance = value;
                 OnPropetryChanged();
             }
         }

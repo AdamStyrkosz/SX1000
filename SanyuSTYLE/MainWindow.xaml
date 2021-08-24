@@ -8,7 +8,7 @@
         Title="RS-Comm SANYU"
         Height="720" 
         Width="1280"
-        ResizeMode="NoResize"
+        ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"
         FontFamily="Calibri"
         >
@@ -627,14 +627,14 @@
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Sekcja import/eksport pozwala na eksport parametrów&#x0a;z falownika i ich import do innych falowników tego samego&#x0a;modelu.&#x0a;Pliki zapisywane sa w formacie *.sanyu i tylko taki typ pliku&#x0a;można importować.&#x0a;Proces importu oraz eksportu trwa kilkasekund i na ten&#x0a;czas aplikacja zostaje zawieszona."
+                                   Text="Sekcja import/eksport pozwala na eksport parametrów&#x0a;z falownika i ich import do innych falowników tego samego&#x0a;modelu.&#x0a;Pliki zapisywane sa w formacie *.sanyu i tylko taki typ pliku&#x0a;można importować.&#x0a;Proces importu oraz eksportu trwa kilka sekund,&#x0a;aplikacja zostaje wstrzymana do czasu wyświetlenia &#x0a;komunikatu potwierdzającego wykonanie akcji."
                                    HorizontalAlignment="Left"
                                    Margin="10,20,5,0"
                                    FontSize="22"/>
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
-                                   Text="Sekcja eksport podglądowy pozwala pobrać wszystkie&#x0a;parametry z falownika do późniejszego podglądu.&#x0a;Pliki zapisywane sa w formacie *.csv, dzięki czemu możliwy&#x0a;jest ich łatwy odczyt w pragoramach takich jak excel czy&#x0a;notatnik.&#x0a;Proces eksportu podglądowego trwa kilka sekund i na ten&#x0a;czas aplikacja zostaje zawieszona."
+                                   Text="Sekcja eksport podglądowy pozwala pobrać wszystkie&#x0a;parametry z falownika do późniejszego podglądu.&#x0a;Pliki zapisywane sa w formacie *.csv, dzięki czemu możliwy&#x0a;jest ich łatwy odczyt w pragoramach takich jak excel czy&#x0a;notatnik.&#x0a;Proces importu oraz eksportu trwa kilka sekund,&#x0a;aplikacja zostaje wstrzymana do czasu wyświetlenia &#x0a;komunikatu potwierdzającego wykonanie akcji."
                                    HorizontalAlignment="Left"
                                    Margin="10,20,5,0"
                                    FontSize="22"/>
@@ -645,22 +645,33 @@
             <!--POŁĄCZENIE-->
             <Button Style="{DynamicResource RoundedBtn}" 
                     Grid.Row="1" 
-                    Content="Połącz/Rozłącz"
+                    Content="{Binding ConnectButtonStance}"
                     Command="{Binding ConnectCommand}" 
                     CommandParameter="10"
-                    HorizontalAlignment="Left"  
+                    HorizontalAlignment="Center"  
                     VerticalAlignment="Bottom" 
-                    Margin="15,0,0,75"
+                    Margin="0,0,15,75"
                     Width="120" 
                     Height="50"
                     FontSize="18"
                     Cursor="Hand"/>
 
-            <TextBlock Grid.Row="1" 
+            <Border Background="#A0CF8C"
+                    BorderThickness="1"
+                    BorderBrush="#A0CF8C"
+                    CornerRadius="5"
+                    Grid.Row="1"
+                    Height="30"
+                    Width="120"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,15,25">
+
+                <TextBlock Grid.Row="1" 
                        Text="{Binding ConnVal}"
-                       HorizontalAlignment="Left" 
-                       Margin="35,0,0,50" 
-                       VerticalAlignment="Bottom"/>
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
+
+            </Border>
         </Grid>
     </Border>
 </Window>
