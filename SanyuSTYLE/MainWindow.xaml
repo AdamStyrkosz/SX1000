@@ -11,13 +11,15 @@
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"
         FontFamily="Calibri"
+        IsEnabled="{Binding IsReady}"
         >
 
     <Border Background="#F2F2F2">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="167"/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="199*"/>
+                <ColumnDefinition Width="914*"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -25,7 +27,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.ColumnSpan="2"
+            <Grid Grid.ColumnSpan="3"
                   Background="#FAFAFA"/>
 
             <Image Source="Images/logo.png" 
@@ -39,37 +41,37 @@
                        VerticalAlignment="Top" 
                        Margin="150,20,0,0" 
                        FontSize="40"
-                       FontWeight="Bold"/>
+                       FontWeight="Bold" Grid.ColumnSpan="2"/>
 
-            <TextBlock Grid.Column="1"
+            <TextBlock Grid.Column="2"
                        Text="Status:"
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Top" 
                        FontSize="20" 
                        Margin="0,15,240,0"/>
 
-            <TextBlock Grid.Column="1"
+            <TextBlock Grid.Column="2"
                        Text="Praca w przód" 
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Top" 
                        Margin="0,15,98,0" 
                        FontSize="18"/>
 
-            <TextBlock Grid.Column="1"
+            <TextBlock Grid.Column="2"
                        Text="Praca w tył" 
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Top" 
                        Margin="0,42,121,0"
                        FontSize="18"/>
 
-            <TextBlock Grid.Column="1" 
+            <TextBlock Grid.Column="2" 
                        Text="STOP" 
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Top" 
                        Margin="0,69,163,0" 
                        FontSize="18"/>
 
-            <Ellipse Grid.Column="1" 
+            <Ellipse Grid.Column="2" 
                      HorizontalAlignment="Right" 
                      Height="12" 
                      Margin="0,24,210,0" 
@@ -78,7 +80,7 @@
                      Width="12" 
                      Fill="{Binding Diody[0]}"/>
 
-            <Ellipse Grid.Column="1"
+            <Ellipse Grid.Column="2"
                      HorizontalAlignment="Right" 
                      Height="12" 
                      Margin="0,48,210,0" 
@@ -87,7 +89,7 @@
                      Width="12" 
                      Fill="{Binding Diody[1]}"/>
 
-            <Ellipse Grid.Column="1"
+            <Ellipse Grid.Column="2"
                      HorizontalAlignment="Right" 
                      Height="12" 
                      Margin="0,72,210,0" 
@@ -98,7 +100,7 @@
 
 
             <TabControl Grid.Row="1" 
-                        Grid.ColumnSpan="2"
+                        Grid.ColumnSpan="3"
                         TabStripPlacement="Left">
                 <!--STRONA STARTOWA-->
                 <TabItem Style="{DynamicResource TabItemTheme}"
@@ -121,7 +123,7 @@
                                    VerticalAlignment="Center"
                                    FontSize="20"
                                    FontWeight="Bold"/>
-                        
+
                         <Image Grid.Row="1"
                                Grid.Column="1"
                                Source="Images/schemat.png"
@@ -415,6 +417,7 @@
                          FontSize="18"
                          Height="50"
                          IsEnabled="{Binding IsConnected}">
+
                     <Grid IsEnabled="{Binding IsConnected}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
@@ -425,7 +428,8 @@
                             <RowDefinition Height="2.5*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
 
@@ -469,30 +473,27 @@
                                    Margin="0,0,50,0" 
                                    FontSize="20"/>
 
-                        <ScrollViewer Grid.Row="5"
-                                      Grid.Column="0" 
-                                      Grid.ColumnSpan="2"
+                        <ScrollViewer Grid.RowSpan="6"
+                                      Grid.Column="2" 
                                       HorizontalAlignment="Right"
-                                      Margin="0,0,300,0"
-                                      Width="813"
+                                      Margin="0,0,0,0"
+                                      Width="447.732"
                                       Background="#F1FFF2">
 
-                            <TextBlock Grid.Row="5" 
-                                   Grid.Column="0" 
-                                   Grid.ColumnSpan="2" 
+                            <TextBlock Grid.RowSpan="6" 
+                                   Grid.Column="2"  
                                    Text="{Binding ZakresWartosci}" 
                                    VerticalAlignment="Center" 
                                    HorizontalAlignment="Center"  
-                                   FontSize="20"/>
-                            
+                                   FontSize="20"
+                                   TextWrapping="Wrap"/>
+
                         </ScrollViewer>
 
-                        <Border Grid.Row="5" 
-                                Grid.Column="0" 
-                                Grid.ColumnSpan="2" 
+                        <Border Grid.RowSpan="6" 
+                                Grid.Column="2"  
                                 BorderBrush="#A0CF8C" 
-                                BorderThickness="2" 
-                                Margin="0,0,300,0"/>
+                                BorderThickness="2"/>
 
                         <ComboBox ItemsSource="{Binding ListaTestowa}" 
                                   SelectedValue="{Binding WybranaKategoria}" 
@@ -500,7 +501,7 @@
                                   DisplayMemberPath="Value" 
                                   Grid.Row="0" 
                                   Grid.Column="1" 
-                                  Width="412" 
+                                  Width="400" 
                                   Height="30"                                 
                                   VerticalAlignment="Center" 
                                   HorizontalAlignment="Left" 
@@ -511,7 +512,7 @@
                                   SelectedValuePath="Key" 
                                   DisplayMemberPath="Value" 
                                   Grid.Row="1" Grid.Column="1" 
-                                  Width="412" Height="30" 
+                                  Width="400" Height="30" 
                                   HorizontalAlignment="Left" 
                                   Margin="25,0,0,0"/>
 
@@ -543,6 +544,14 @@
                                  Margin="25,0,0,0" 
                                  MaxLength="5"/>
 
+                        <TextBlock Grid.Column="1"
+                                   Grid.Row="4"
+                                   Text="{Binding Etykieta}"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,0,200,0"
+                                   FontSize="19"/>
+
                         <Button Style="{DynamicResource RoundedBtn}"
                                 Command="{Binding SaveRegisterCommand}" 
                                 CommandParameter="{Binding WybranyParametr}"
@@ -555,7 +564,7 @@
                                 Cursor="Hand" 
                                 VerticalAlignment="Center" 
                                 HorizontalAlignment="Right" 
-                                Margin="0,0,100,0"/>
+                                Margin="0,0,50,0"/>
                     </Grid>
                 </TabItem>
 
@@ -612,8 +621,8 @@
                                 Width="100"
                                 Height="50"
                                 Margin="0,0,120,0"/>
-                        
-                        
+
+
 
                         <Button Style="{DynamicResource RoundedBtn}"
                                 Command="{Binding FullExportCommand}"
@@ -648,9 +657,9 @@
                     Content="{Binding ConnectButtonStance}"
                     Command="{Binding ConnectCommand}" 
                     CommandParameter="10"
-                    HorizontalAlignment="Center"  
+                    HorizontalAlignment="Left"  
                     VerticalAlignment="Bottom" 
-                    Margin="0,0,15,75"
+                    Margin="16,0,0,75"
                     Width="120" 
                     Height="50"
                     FontSize="18"
@@ -664,7 +673,7 @@
                     Height="30"
                     Width="120"
                     VerticalAlignment="Bottom"
-                    Margin="0,0,15,25">
+                    Margin="16,0,31,25">
 
                 <TextBlock Grid.Row="1" 
                        Text="{Binding ConnVal}"

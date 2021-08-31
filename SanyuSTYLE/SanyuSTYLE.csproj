@@ -21,6 +21,7 @@
     <None Remove="Images\falownik-skalarny-SX1000.png" />
     <None Remove="Images\logo.png" />
     <None Remove="Images\schemat.png" />
+    <None Remove="Images\spinner.gif" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,12 +29,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
     <PackageReference Include="System.IO.Ports" Version="5.0.1" />
+    <PackageReference Include="XamlAnimatedGif" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Images\falownik-skalarny-SX1000.png" />
     <Resource Include="Images\logo.png" />
     <Resource Include="Images\schemat.png" />
+    <Resource Include="Images\spinner.gif" />
   </ItemGroup>
 
 </Project>

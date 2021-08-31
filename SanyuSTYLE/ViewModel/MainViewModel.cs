@@ -2,6 +2,7 @@
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
 using SANYU2021.Commands;
+using SanyuSTYLE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,6 +24,7 @@ namespace SANYU2021.ViewModel
         private ModbusClient ModClient = new ModbusClient("COM3");
         private DispatcherTimer connectionTimer = new DispatcherTimer();
         private DispatcherTimer odczytTimer = new DispatcherTimer();
+        WaitWindow w2 = new WaitWindow();
         private Rejestr aktualnyRejestr;
         private bool _odczytStance = false;
         private int _engineStance = -1;
@@ -197,11 +199,10 @@ namespace SANYU2021.ViewModel
         {
             if (!IsConnected)
             {
-                zaloguj();
-                //ConnVal = "Wymuszony start!!!";
-                //ConnectButtonStance = "Rozłącz";
-                //IsConnected = true;
-
+                //zaloguj();
+                ConnVal = "Wymuszony start!!!";
+                ConnectButtonStance = "Rozłącz";
+                IsConnected = true;
             }
             else
             {
@@ -222,13 +223,13 @@ namespace SANYU2021.ViewModel
                 case 1:
                     Diody = new SolidColorBrush[]
                     {
-                        new SolidColorBrush(Colors.Green), new SolidColorBrush(Colors.Gray) , new SolidColorBrush(Colors.Gray)
+                        new SolidColorBrush(Colors.Lime), new SolidColorBrush(Colors.Gray) , new SolidColorBrush(Colors.Gray)
                     };
                     break;
                 case 2:
                     Diody = new SolidColorBrush[]
                     {
-                        new SolidColorBrush(Colors.Gray), new SolidColorBrush(Colors.Green) , new SolidColorBrush(Colors.Gray)
+                        new SolidColorBrush(Colors.Gray), new SolidColorBrush(Colors.Lime) , new SolidColorBrush(Colors.Gray)
                     };
                     break;
                 default:
@@ -251,8 +252,6 @@ namespace SANYU2021.ViewModel
                 ConnectButtonStance = "Rozłącz";
                 IsConnected = true;
                 connectionTimer.Start();
-
-
             }
             catch
             {
@@ -267,7 +266,9 @@ namespace SANYU2021.ViewModel
         {
             int[] val = ModClient.ReadHoldingRegisters(10, 1);
             AlarmErrorLabel = StaticArrays.bledyAlarmow[val[0]];
-            AlarmParameters = ModClient.ReadHoldingRegisters(14, 5);
+            val = ModClient.ReadHoldingRegisters(14, 5);
+            double[] temp = new double[5] { val[0]*1.0 / 10, val[1]*1.0 / 10, val[2], val[3]*1.0/10, val[4]*1.0/10};
+            AlarmParameters = temp;         
         }
 
         void wyloguj()
@@ -338,8 +339,8 @@ namespace SANYU2021.ViewModel
         }
 
         //parametry ostatniego alarmu
-        private int[] _alarmParameters;
-        public int[] AlarmParameters
+        private double[] _alarmParameters;
+        public double[] AlarmParameters
         {
             get { return _alarmParameters; }
             set { _alarmParameters = value;
@@ -454,6 +455,15 @@ namespace SANYU2021.ViewModel
             }
         }
 
+        private string _etykieta = "";
+        public string Etykieta
+        {
+            get { return _etykieta; }
+            set { _etykieta = value;
+                OnPropetryChanged();
+            }
+        }
+
         //zmienna przechowująca biezaca wartosc dla danego rejestru -> falownik
         private int _biezacaWartosc;
         public int BiezacaWartosc
@@ -473,6 +483,7 @@ namespace SANYU2021.ViewModel
             BiezacaWartosc = 0;
             WartoscDomyslna = 0;
             ZakresWartosci = "-";
+            Etykieta = "";
             WybranyParametr = null;
             ListaRejestrow = null;
             aktualnyRejestr = null;
@@ -517,6 +528,7 @@ namespace SANYU2021.ViewModel
                 aktualnyRejestr = DbLocator.Database.TabelaRejestrow.FirstOrDefault(x => x.NazwaRejestru == rejestr);
                 WartoscDomyslna = aktualnyRejestr.WartoscDomyslna;
                 ZakresWartosci = aktualnyRejestr.ZakresWartosci;
+                Etykieta = aktualnyRejestr.Etykieta;
                 Typ = StaticArrays.typyRejestrow[aktualnyRejestr.Typ];
                 if (aktualnyRejestr.Typ > 0) BiezacaWartoscEnabled = true;
                 try
@@ -535,47 +547,75 @@ namespace SANYU2021.ViewModel
         //IMPORT EKSPORT:
 
         //EKSPORT PODGLĄDOWY
-       private void saveFile(object obj)
+
+       private async void saveFile(object obj)
         {
-            string savedFile = null;
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Pliki Sanyu | *.sanyu";
             if (sfd.ShowDialog() == true)
             {
-                IsReady = false;
-                savedFile = Path.GetFullPath(sfd.FileName.ToString());
-                StringBuilder csv = new StringBuilder();
-                csv.Append("rejestr;wartosc\n");
-                foreach (var rej in DbLocator.Database.TabelaRejestrow.Where(x => x.Typ != 0).ToList())
+                w2.Show();              
+                int result = await saveFileAsync(sfd);
+                w2.Hide();
+                if(result == 1) MessageBox.Show("Pomyślnie zapisano plik!");
+                else
                 {
-                    try
-                    {
-                        var valueToExport = ModClient.ReadHoldingRegisters(rej.Id, 1)[0];         
-                        var newLine = string.Format("{0};{1}\n", rej.Id, valueToExport);
-                        csv.Append(newLine);
-                    }
-                    catch
-                    {
-                        IsReady = true;
-                        MessageBox.Show("Nie udało się zapisać pliku");
-                        return;
-                    }
+                    MessageBox.Show("Nie udało się zapisać pliku");
                 }
-                File.AppendAllText(savedFile, csv.ToString());
-                IsReady = true;
-                MessageBox.Show("Pomyślnie zapisano plik!");
-            }
+            }                
         }
 
-        private void fullexport(object obj)
+        private async Task<int> saveFileAsync(SaveFileDialog sfd)
         {
-            string savedFile = null;
+            return await Task.Run(() =>
+            {
+                    string savedFile = Path.GetFullPath(sfd.FileName.ToString());
+                    StringBuilder csv = new StringBuilder();
+                    IsReady = false;
+                    csv.Append("rejestr;wartosc\n");                   
+                    foreach (var rej in DbLocator.Database.TabelaRejestrow.Where(x => x.Typ != 0).ToList())
+                    {
+                        try
+                        {
+                            var valueToExport = ModClient.ReadHoldingRegisters(rej.Id, 1)[0];         
+                            var newLine = string.Format("{0};{1}\n", rej.Id, valueToExport);
+                            csv.Append(newLine);
+                        }
+                        catch
+                        {
+                            IsReady = true;                           
+                            return 0;
+                        }
+                    }
+                    File.AppendAllText(savedFile, csv.ToString());
+                    IsReady = true;
+                    return 1;                
+            });
+        }
+
+        private async void fullexport(object obj)
+        {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Pliki *.csv | *.csv";
             if (sfd.ShowDialog() == true)
             {
+                w2.Show();
+                int result = await fullexportAsync(sfd);
+                w2.Hide();
+                if (result == 1) MessageBox.Show("Pomyślnie zapisano plik!");
+                else
+                {
+                    MessageBox.Show("Nie udało się zapisać pliku");
+                }
+            }
+        }
+
+        private async Task<int> fullexportAsync(SaveFileDialog sfd)
+        {
+            return await Task.Run(() =>
+            {
                 IsReady = false;
-                savedFile = Path.GetFullPath(sfd.FileName.ToString());
+                string savedFile = Path.GetFullPath(sfd.FileName.ToString());
                 StringBuilder csv = new StringBuilder();
                 csv.Append("rejestr;wartosc_domyslna;wartosc_biezaca\n");
                 foreach (var rej in DbLocator.Database.TabelaRejestrow.ToList())
@@ -588,18 +628,18 @@ namespace SANYU2021.ViewModel
                     }
                     catch
                     {
-                        MessageBox.Show("Nie udało się zapisać pliku");
-                        return;
+                        IsReady = true;
+                        return 0;
                     }
                 }
                 File.AppendAllText(savedFile, csv.ToString());
-                IsReady = true;
-                MessageBox.Show("Pomyślnie zapisano plik!");
-            }
+                IsReady = true;               
+                return 1;
+            });
         }
 
         //IMPORT
-        private void openFile(object obj)
+        private async void openFile(object obj)
         {
             if (_engineStance != 0)
             {
@@ -612,44 +652,53 @@ namespace SANYU2021.ViewModel
 
             if (dialog.ShowDialog() == true)
             {
-                importFile(dialog.FileName);
+                w2.Show();
+                int result = await importFileAsync(dialog.FileName);
+                w2.Hide();
+                if (result == 1) MessageBox.Show("Poprawnie zaimportowano plik");
+                else
+                {
+                    MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
+                }               
             }
         }
-        private void importFile(string fileName)
+
+        private async Task<int> importFileAsync(string fileName)
         {
-          
-            using (TextFieldParser parser = new TextFieldParser(fileName))
+            return await Task.Run(() =>
             {
-                parser.TextFieldType = FieldType.Delimited;
-                parser.SetDelimiters(";");
-                int rejestr;
-                int wartosc;
-                if (!parser.EndOfData)
+                IsReady = false;
+                using (TextFieldParser parser = new TextFieldParser(fileName))
                 {
-                    parser.ReadLine();
-                }
-                while (!parser.EndOfData)
-                {
-                    try
+                    parser.TextFieldType = FieldType.Delimited;
+                    parser.SetDelimiters(";");
+                    int rejestr;
+                    int wartosc;
+                    if (!parser.EndOfData)
                     {
-                        //Process row
-                        string[] fields = parser.ReadFields();
-                        rejestr = Int32.Parse(fields[0]);
-                        wartosc = Int32.Parse(fields[1]);
-                        ModClient.WriteSingleRegister(rejestr, wartosc);
+                        parser.ReadLine();
                     }
-                    catch
+                    while (!parser.EndOfData)
                     {
-                        MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
-                        return;
+                        try
+                        {
+                            //Process row
+                            string[] fields = parser.ReadFields();
+                            rejestr = Int32.Parse(fields[0]);
+                            wartosc = Int32.Parse(fields[1]);
+                            ModClient.WriteSingleRegister(rejestr, wartosc);
+                        }
+                        catch
+                        {
+                            IsReady = true;
+                            return 0;
+                        }
                     }
+                    IsReady = true;
+                    return 1;
                 }
-                MessageBox.Show("Poprawnie zaimportowano plik");
-            }
+            });
         }
-
-
-
 
         //event, prosze nie modyfikowac
         public event PropertyChangedEventHandler PropertyChanged;
