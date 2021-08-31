@@ -24,10 +24,12 @@ namespace SANYU2021.ViewModel
         private ModbusClient ModClient = new ModbusClient("COM3");
         private DispatcherTimer connectionTimer = new DispatcherTimer();
         private DispatcherTimer odczytTimer = new DispatcherTimer();
-        WaitWindow w2 = new WaitWindow();
+
         private Rejestr aktualnyRejestr;
         private bool _odczytStance = false;
         private int _engineStance = -1;
+
+        WaitWindow w2 = new WaitWindow();
 
         public MainViewModel()
         {
@@ -37,11 +39,11 @@ namespace SANYU2021.ViewModel
             odczytTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
             odczytTimer.Tick += OdczytTimer_Tick;
 
-            //tymczasowe parametry polacznia slave
+            //T Y M C Z A S O W E parametry polacznia slave
             ModClient.Baudrate = 9600;
             ModClient.Parity = System.IO.Ports.Parity.None;
 
-            //komendy
+            //komendy przyciskow z UI
             ConnectCommand = new RelayCommand(ConnectFunc);
             OdczytCommand = new RelayCommand(OdczytFunc);
             EngineCommand = new RelayCommand(EngineFunc);
@@ -49,10 +51,6 @@ namespace SANYU2021.ViewModel
             ExportCommand = new RelayCommand(saveFile);
             ImportCommand = new RelayCommand(openFile);
             FullExportCommand = new RelayCommand(fullexport);
-
-            //zmienne
-            ConnVal = "Brak połączenia";
-            IsConnected = false;
         }
 
         private void SaveRegisterFunc(object obj)
@@ -66,14 +64,14 @@ namespace SANYU2021.ViewModel
                     case 1:
                         if (BiezacaWartosc > aktualnyRejestr.Max || BiezacaWartosc < aktualnyRejestr.Min)
                         {
-                            MessageBox.Show("Wprowadzono niepoprawną wartość");
+                            MessageBox.Show("Wprowadzono niepoprawną wartość","Błąd wartości", MessageBoxButton.OK, MessageBoxImage.Error);
                             try
                             {
                                 BiezacaWartosc = ModClient.ReadHoldingRegisters(aktualnyRejestr.Id, 1)[0];
                             }
                             catch
                             {
-                                MessageBox.Show("Błąd podczas zczytywania parametru");
+                                MessageBox.Show("Błąd podczas zczytywania parametru","Błąd parametru", MessageBoxButton.OK, MessageBoxImage.Error);
                                 BiezacaWartosc = 0;
                             }
                         }
@@ -87,7 +85,7 @@ namespace SANYU2021.ViewModel
                             }
                             catch
                             {
-                                MessageBox.Show("NIEZNANY BŁĄD PARAMETRU/ BRAK ZGODNOSCI Z INTRUKCJA");
+                                MessageBox.Show("Brak zgodności z intrukcją","Błąd parametru", MessageBoxButton.OK, MessageBoxImage.Error);
                                 BiezacaWartosc = 0;
                             }
                         }
@@ -95,14 +93,14 @@ namespace SANYU2021.ViewModel
                     case 2:
                         if (BiezacaWartosc > aktualnyRejestr.Max || BiezacaWartosc < aktualnyRejestr.Min || _engineStance != 0)
                         {
-                            MessageBox.Show("Wprowadzono niepoprawną wartość lub silnik nie jest w stanie STOP");
+                            MessageBox.Show("Wprowadzono niepoprawną wartość lub silnik nie jest w stanie STOP","Błąd wartości", MessageBoxButton.OK, MessageBoxImage.Error);
                             try
                             {
                                 BiezacaWartosc = ModClient.ReadHoldingRegisters(aktualnyRejestr.Id, 1)[0];
                             }
                             catch
                             {
-                                MessageBox.Show("Błąd podczas zczytywania parametru");
+                                MessageBox.Show("Błąd podczas zczytywania parametru","Błąd parametru", MessageBoxButton.OK, MessageBoxImage.Error);
                                 BiezacaWartosc = 0;
                             }
                         }
@@ -114,7 +112,7 @@ namespace SANYU2021.ViewModel
                             }
                             catch
                             {
-                                MessageBox.Show("NIEZNANY BŁĄD PARAMETRU/ BRAK ZGODNOSCI Z INTRUKCJA");
+                                MessageBox.Show("Brak zgodności z intrukcją","Błąd parametru", MessageBoxButton.OK, MessageBoxImage.Error);
                                 BiezacaWartosc = 0;
                             }
                         }
@@ -132,7 +130,7 @@ namespace SANYU2021.ViewModel
             }
             catch
             {
-                MessageBox.Show("Bład podczas wywolywania funkcji rozruchu lub stopu");
+                MessageBox.Show("Bład podczas wywolywania funkcji rozruchu lub stopu","Błąd silnika", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -199,10 +197,10 @@ namespace SANYU2021.ViewModel
         {
             if (!IsConnected)
             {
-                //zaloguj();
-                ConnVal = "Wymuszony start!!!";
-                ConnectButtonStance = "Rozłącz";
-                IsConnected = true;
+                zaloguj();
+                //ConnVal = "Wymuszony start!!!";
+                //ConnectButtonStance = "Rozłącz";
+                //IsConnected = true;
             }
             else
             {
@@ -318,7 +316,7 @@ namespace SANYU2021.ViewModel
         }
 
 
-        private string _connVal;
+        private string _connVal = "Brak połączenia";
         public string ConnVal
         {
             get { return _connVal; }
@@ -339,7 +337,7 @@ namespace SANYU2021.ViewModel
         }
 
         //parametry ostatniego alarmu
-        private double[] _alarmParameters;
+        private double[] _alarmParameters = new double[5] { 0, 0, 0, 0, 0 };
         public double[] AlarmParameters
         {
             get { return _alarmParameters; }
@@ -350,7 +348,7 @@ namespace SANYU2021.ViewModel
 
 
         //stan polaczenia => true - połączono
-        private bool _isconnected;
+        private bool _isconnected = false;
         public bool IsConnected
         {
             get { return _isconnected; }
@@ -543,10 +541,7 @@ namespace SANYU2021.ViewModel
             else aktualnyRejestr = null;
         }
 
-
-        //IMPORT EKSPORT:
-
-        //EKSPORT PODGLĄDOWY
+        //import + export + full export
 
        private async void saveFile(object obj)
         {
@@ -557,10 +552,10 @@ namespace SANYU2021.ViewModel
                 w2.Show();              
                 int result = await saveFileAsync(sfd);
                 w2.Hide();
-                if(result == 1) MessageBox.Show("Pomyślnie zapisano plik!");
+                if(result == 1) MessageBox.Show("Pomyślnie zapisano plik!","Zapis pliku",MessageBoxButton.OK,MessageBoxImage.Information);
                 else
                 {
-                    MessageBox.Show("Nie udało się zapisać pliku");
+                    MessageBox.Show("Nie udało się zapisać pliku","Błąd zapisu", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }                
         }
@@ -602,10 +597,10 @@ namespace SANYU2021.ViewModel
                 w2.Show();
                 int result = await fullexportAsync(sfd);
                 w2.Hide();
-                if (result == 1) MessageBox.Show("Pomyślnie zapisano plik!");
+                if (result == 1) MessageBox.Show("Pomyślnie zapisano plik!","Zapis pliku", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
                 {
-                    MessageBox.Show("Nie udało się zapisać pliku");
+                    MessageBox.Show("Nie udało się zapisać pliku","Błąd zapisu", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -643,7 +638,7 @@ namespace SANYU2021.ViewModel
         {
             if (_engineStance != 0)
             {
-                MessageBox.Show("Wymagany tryb STOP");
+                MessageBox.Show("Wymagany tryb STOP","Uwaga!", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             OpenFileDialog dialog = new OpenFileDialog();
@@ -655,10 +650,10 @@ namespace SANYU2021.ViewModel
                 w2.Show();
                 int result = await importFileAsync(dialog.FileName);
                 w2.Hide();
-                if (result == 1) MessageBox.Show("Poprawnie zaimportowano plik");
+                if (result == 1) MessageBox.Show("Poprawnie zaimportowano plik","Import", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
                 {
-                    MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr");
+                    MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr","Błąd nadpisywania", MessageBoxButton.OK, MessageBoxImage.Error);
                 }               
             }
         }
