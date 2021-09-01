@@ -371,7 +371,7 @@
                                  VerticalAlignment="Top" 
                                  HorizontalAlignment="Right" 
                                  Margin="0,50,30,0" 
-                                 Width="290" 
+                                 Width="325" 
                                  IsEnabled="False"/>
 
                         <Label Content="{Binding AlarmParameters[0]}"

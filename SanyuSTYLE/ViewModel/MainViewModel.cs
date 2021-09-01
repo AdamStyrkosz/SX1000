@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -434,7 +435,7 @@ namespace SANYU2021.ViewModel
         }
 
         //zmienna przechowująca zakres wartosci dla danego rejestru -> dB
-        private string _zakresWartosci;
+        private string _zakresWartosci = "-";
         public string ZakresWartosci
         {
             get { return _zakresWartosci; }
@@ -549,12 +550,19 @@ namespace SANYU2021.ViewModel
             sfd.Filter = "Pliki Sanyu | *.sanyu";
             if (sfd.ShowDialog() == true)
             {
+                zatrzymajCzytanie();
+                connectionTimer.Stop();
                 w2.Show();              
                 int result = await saveFileAsync(sfd);
                 w2.Hide();
-                if(result == 1) MessageBox.Show("Pomyślnie zapisano plik!","Zapis pliku",MessageBoxButton.OK,MessageBoxImage.Information);
+                if (result == 1) 
+                {
+                    connectionTimer.Start();
+                    MessageBox.Show("Pomyślnie zapisano plik!", "Zapis pliku", MessageBoxButton.OK, MessageBoxImage.Information);
+                } 
                 else
                 {
+                    connectionTimer.Start();
                     MessageBox.Show("Nie udało się zapisać pliku","Błąd zapisu", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }                
@@ -594,13 +602,20 @@ namespace SANYU2021.ViewModel
             sfd.Filter = "Pliki *.csv | *.csv";
             if (sfd.ShowDialog() == true)
             {
+                zatrzymajCzytanie();
+                connectionTimer.Stop();
                 w2.Show();
                 int result = await fullexportAsync(sfd);
                 w2.Hide();
-                if (result == 1) MessageBox.Show("Pomyślnie zapisano plik!","Zapis pliku", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (result == 1)
+                {
+                    connectionTimer.Start();
+                    MessageBox.Show("Pomyślnie zapisano plik!", "Zapis pliku", MessageBoxButton.OK, MessageBoxImage.Information);                   
+                }
                 else
                 {
-                    MessageBox.Show("Nie udało się zapisać pliku","Błąd zapisu", MessageBoxButton.OK, MessageBoxImage.Error);
+                    connectionTimer.Start();
+                    MessageBox.Show("Nie udało się zapisać pliku", "Błąd zapisu", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -647,13 +662,20 @@ namespace SANYU2021.ViewModel
 
             if (dialog.ShowDialog() == true)
             {
+                zatrzymajCzytanie();
+                connectionTimer.Stop();
                 w2.Show();
                 int result = await importFileAsync(dialog.FileName);
                 w2.Hide();
-                if (result == 1) MessageBox.Show("Poprawnie zaimportowano plik","Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (result == 1)
+                {
+                    connectionTimer.Start();
+                    MessageBox.Show("Poprawnie zaimportowano plik", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
                 else
                 {
-                    MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr","Błąd nadpisywania", MessageBoxButton.OK, MessageBoxImage.Error);
+                    connectionTimer.Start();
+                    MessageBox.Show("Plik ma nieprawidłowy format lub próbowano nadpisać niemodyfikowalny rejestr", "Błąd nadpisywania", MessageBoxButton.OK, MessageBoxImage.Error);
                 }               
             }
         }
